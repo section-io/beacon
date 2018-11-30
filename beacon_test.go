@@ -2,9 +2,8 @@ package beacon
 
 import (
 	"bytes"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func eventToString(t *testing.T, ev Event) string {
@@ -52,4 +51,17 @@ func TestWriteKubernetesBeaconLine(t *testing.T) {
 	assert.Contains(t, line, `"context":{"account":"Peterson"}`, "context")
 	assert.Contains(t, line, `"annotations":{"timing_unit":"ms"}`, "annotations")
 	assert.Contains(t, line, `"correlationId":"abc123"`, "correlation id")
+}
+
+func TestBeaconSingleError(t *testing.T) {
+	ev := BeaconSingleInfoCount("test", map[string]string{
+		"error": "one",
+		"other": "two",
+	})
+
+	line := eventToString(t, ev)
+	assert.Contains(t, line, `"label":"test",`, "label")
+	assert.Contains(t, line, `"severity":"info",`, "severity")
+	assert.Contains(t, line, `"metric":{"type":"count","value":1}`, "metric")
+	assert.Contains(t, line, `"annotations":{"error":"one","other":"two"}`, "annotations")
 }
