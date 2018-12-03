@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+//TODO export struct instead of interface https://github.com/golang/go/wiki/CodeReviewComments#interfaces
 type Event interface {
 	AddContext(key, value string) Event
 	AddAnnotation(key, value string) Event
@@ -37,6 +38,28 @@ func NewEvent(label string, severity Severity, metricType MetricType, metricValu
 			Value: metricValue,
 		},
 	}
+}
+
+func panicOnError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Convenience method to beacon a single count-type info event, panics if there is a resulting error
+func BeaconSingleInfoCount(label string, annotations map[string]string) Event {
+	ev := NewEvent(
+		label,
+		Info,
+		Count,
+		1,
+	)
+	for k, v := range annotations {
+		ev.AddAnnotation(k, v)
+	}
+	err := ev.WriteToStderr()
+	panicOnError(err)
+	return ev
 }
 
 func (e *event) AddContext(key, value string) Event {
