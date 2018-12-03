@@ -7,9 +7,10 @@ RUN apk add --no-cache \
 
 RUN go get -v github.com/kisielk/errcheck/
 
-# WORKDIR /go/src/github.com/section-io/beacon
 WORKDIR /src
-COPY *.go go.mod go.sum ./
+COPY go.mod go.sum ./
+RUN go mod download
+COPY *.go ./
 
 RUN gofmt -e -s -d . 2>&1 | tee /gofmt.out && test ! -s /gofmt.out
 
